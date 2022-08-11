@@ -1,33 +1,41 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-class Square extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: null,
-    }
-  }
-  render() {
-    return (
-      <button 
-        className="square"
-        onClick={() => { this.setState({ value: 'X' }) }}
-      >
-        {this.state.value}
-      </button>
-    );
-  }
+function Square(props) {
+  return (
+    <button
+      className="square"
+      onClick={props.onClick}
+    >
+      {props.value}
+    </button>
+  );
 }
 
 class Board extends React.Component {
-  renderSquare(i) {
-    return <Square value={i} />;
+  constructor(props) {
+    super(props);
+    this.state = {
+      square: new Array(9).fill(null),
+      isNext: true,
+    }
   }
-
+  renderSquare(i) {
+    return <Square value={this.state.square[i]} onClick={() => this.handleClick(i)} />;
+  }
+  handleClick(i) {
+    const square = this.state.square.slice();
+    square[i] = this.state.isNext ? 'X' : 'O';
+    this.setState({ square, isNext: !this.state.isNext });
+  }
   render() {
-    const status = 'Next player: X';
-
+    let status;
+    const winner = calculateWinner(this.state.square);
+    if(winner) {
+      status = 'Winner: ' + winner;
+    } else {
+      status = 'Next player: ' + (this.state.isNext ? 'X' : 'O');
+    }
     return (
       <div>
         <div className="status">{status}</div>
@@ -67,6 +75,26 @@ class Game extends React.Component {
   }
 }
 
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
 // ========================================
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
